@@ -1,0 +1,59 @@
+:root {
+  color-scheme: light;
+
+  /* Berlge decision-lab palette */
+  --blg-ink-950: #14251f;
+  --blg-ink-800: #2a3d36;
+  --blg-ink-650: #4b5f57;
+  --blg-ink-500: #667a72;
+  --blg-paper: #f7f8f4;
+  --blg-surface: #ffffff;
+  --blg-surface-raised: #fbfcf9;
+  --blg-surface-sunken: #eef1ec;
+  --blg-line: #d5dcd5;
+  --blg-line-strong: #aebbb3;
+  --blg-accent: #075e4a;
+  --blg-accent-hover: #064b3c;
+  --blg-accent-soft: #dcece5;
+  --blg-signal: #d7ff45;
+  --blg-signal-ink: #203000;
+  --blg-pass: #176b50;
+  --blg-pass-soft: #e2f1e9;
+  --blg-warn: #8b5800;
+  --blg-warn-soft: #fff0ca;
+  --blg-fail: #9b342d;
+  --blg-fail-soft: #fbe8e4;
+  --blg-neutral-soft: #e8ece8;
+
+  /* Local/system typography */
+  --blg-font-sans: Aptos, "Segoe UI Variable", "Segoe UI", system-ui, sans-serif;
+  --blg-font-data: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --blg-text-xs: 0.6875rem;
+  --blg-text-sm: 0.8125rem;
+  --blg-text-md: 0.9375rem;
+  --blg-text-lg: 1.0625rem;
+  --blg-text-xl: clamp(1.35rem, 2vw, 1.75rem);
+  --blg-text-display: clamp(2rem, 4.3vw, 4.25rem);
+
+  /* Four-pixel spacing rhythm */
+  --blg-space-1: 0.25rem;
+  --blg-space-2: 0.5rem;
+  --blg-space-3: 0.75rem;
+  --blg-space-4: 1rem;
+  --blg-space-5: 1.25rem;
+  --blg-space-6: 1.5rem;
+  --blg-space-8: 2rem;
+  --blg-space-10: 2.5rem;
+  --blg-space-12: 3rem;
+  --blg-space-16: 4rem;
+
+  --blg-radius-sm: 0.375rem;
+  --blg-radius-md: 0.75rem;
+  --blg-radius-lg: 1rem;
+  --blg-border: 1px solid var(--blg-line);
+  --blg-shadow-raised: 0 1px 1px rgb(20 37 31 / 0.05), 0 12px 32px -24px rgb(20 37 31 / 0.48);
+  --blg-shadow-focus: 0 0 0 3px rgb(7 94 74 / 0.2);
+  --blg-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --blg-duration-fast: 140ms;
+  --blg-duration-base: 280ms;
+}

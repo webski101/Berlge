@@ -19,7 +19,7 @@ import {
   type WeightedPreferenceItem,
 } from './components/index.ts'
 import { preparedRealtimeDecision } from './data/index.ts'
-import { generateAdrMarkdown } from './lib/index.ts'
+import { formatPercentage, generateAdrMarkdown } from './lib/index.ts'
 import {
   createAdrInput,
   createRealtimeDecision,
@@ -273,28 +273,30 @@ function App() {
       label: 'p95 latency',
       description: 'Faster delivery earns a higher normalized score.',
       weight: model.result.normalizedWeights.p95LatencyMs * 100,
-      weightLabel: `${model.result.normalizedWeights.p95LatencyMs * 100}%`,
+      weightLabel: formatPercentage(model.result.normalizedWeights.p95LatencyMs),
     },
     {
       id: 'reconnect',
       label: 'Reconnect time',
       description: 'Faster recovery earns a higher normalized score.',
       weight: model.result.normalizedWeights.reconnectTimeMs * 100,
-      weightLabel: `${model.result.normalizedWeights.reconnectTimeMs * 100}%`,
+      weightLabel: formatPercentage(model.result.normalizedWeights.reconnectTimeMs),
     },
     {
       id: 'size',
       label: 'Implementation size',
       description: 'Fewer owned lines reduce maintenance cost.',
       weight: model.result.normalizedWeights.implementationSizeLines * 100,
-      weightLabel: `${model.result.normalizedWeights.implementationSizeLines * 100}%`,
+      weightLabel: formatPercentage(
+        model.result.normalizedWeights.implementationSizeLines,
+      ),
     },
     {
       id: 'complexity',
       label: 'Complexity',
       description: 'Simpler operational behavior is preferred.',
       weight: model.result.normalizedWeights.complexity * 100,
-      weightLabel: `${model.result.normalizedWeights.complexity * 100}%`,
+      weightLabel: formatPercentage(model.result.normalizedWeights.complexity),
     },
   ]
 

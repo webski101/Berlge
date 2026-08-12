@@ -8,3 +8,4 @@ export {
   type AdrInput,
   type AdrWeightedPreference,
 } from './adr.ts'
+export { formatPercentage } from './formatPercentage.ts'

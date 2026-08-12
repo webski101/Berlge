@@ -1,4 +1,4 @@
-import { DownloadIcon } from './icons'
+import { CopyIcon, DownloadIcon } from './icons'
 
 export interface AdrExportActionProps {
   onExport: () => void
@@ -7,6 +7,9 @@ export interface AdrExportActionProps {
   fileName?: string
   description?: string
   buttonLabel?: string
+  onCopy?: () => void
+  copyLabel?: string
+  feedback?: string
 }
 
 export function AdrExportAction({
@@ -16,6 +19,9 @@ export function AdrExportAction({
   fileName = 'architecture-decision.md',
   description = 'Capture the constraints, evidence, scores, and selected approach in a portable decision record.',
   buttonLabel = 'Export ADR',
+  onCopy,
+  copyLabel = 'Copy Markdown',
+  feedback,
 }: AdrExportActionProps) {
   return (
     <aside className="blg-adr-action" aria-labelledby="blg-adr-title">
@@ -25,16 +31,33 @@ export function AdrExportAction({
         <p>{description}</p>
         <code>{fileName}</code>
       </div>
-      <button
-        className="blg-button blg-button--secondary"
-        type="button"
-        onClick={onExport}
-        disabled={disabled || isExporting}
-        aria-busy={isExporting}
-      >
-        <DownloadIcon className="blg-button__icon" />
-        {isExporting ? 'Preparing ADR…' : buttonLabel}
-      </button>
+      <div className="blg-adr-action__controls">
+        <div className="blg-adr-action__buttons">
+          {onCopy ? (
+            <button
+              className="blg-button blg-button--tertiary"
+              type="button"
+              onClick={onCopy}
+              disabled={disabled || isExporting}
+            >
+              <CopyIcon className="blg-button__icon" />
+              {isExporting ? 'Copying…' : copyLabel}
+            </button>
+          ) : null}
+          <button
+            className="blg-button blg-button--secondary"
+            type="button"
+            onClick={onExport}
+            disabled={disabled || isExporting}
+          >
+            <DownloadIcon className="blg-button__icon" />
+            {buttonLabel}
+          </button>
+        </div>
+        <p className="blg-adr-action__feedback" aria-live="polite">
+          {feedback ?? 'Markdown is generated locally from the result above.'}
+        </p>
+      </div>
     </aside>
   )
 }

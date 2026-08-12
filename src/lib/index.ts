@@ -7,4 +7,4 @@ export {
   type AdrHardRequirement,
   type AdrInput,
   type AdrWeightedPreference,
-} from './adr'
+} from './adr.ts'

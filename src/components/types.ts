@@ -1,4 +1,4 @@
-export type CandidateId = 'polling' | 'sse' | 'websocket'
+export type CandidateId = 'polling' | 'sse' | 'websockets'
 
 export type CandidateTone = 'neutral' | 'recommended' | 'ineligible'
 

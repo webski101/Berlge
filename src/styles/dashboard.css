@@ -170,6 +170,15 @@
   background: #c9f12f;
 }
 
+.blg-button--tertiary {
+  background: #31463d;
+  color: #fff;
+}
+
+.blg-button--tertiary:hover:not(:disabled) {
+  background: #3d554a;
+}
+
 .blg-button__icon {
   height: 1rem;
   width: 1rem;
@@ -1119,6 +1128,26 @@
   padding: 0.35rem 0.55rem;
 }
 
+.blg-adr-action__controls {
+  align-items: flex-end;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: var(--blg-space-3);
+}
+
+.blg-adr-action__buttons {
+  display: flex;
+  gap: var(--blg-space-2);
+}
+
+.blg-adr-action .blg-adr-action__feedback {
+  color: #bdcac4;
+  font-size: var(--blg-text-xs);
+  min-height: 1.2em;
+  text-align: right;
+}
+
 @media (max-width: 960px) {
   .blg-decision-brief {
     gap: var(--blg-space-6);
@@ -1191,7 +1220,10 @@
   .blg-recommendation__result { margin-top: var(--blg-space-10); }
 
   .blg-adr-action { align-items: stretch; flex-direction: column; }
+  .blg-adr-action__controls { align-items: stretch; }
+  .blg-adr-action__buttons { flex-direction: column-reverse; }
   .blg-adr-action .blg-button { width: 100%; }
+  .blg-adr-action .blg-adr-action__feedback { text-align: left; }
 }
 
 @media (prefers-reduced-motion: reduce) {

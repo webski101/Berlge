@@ -4,4 +4,4 @@ export {
   type BenchmarkEvidence,
   type CandidateId,
   type PreparedDecisionFixture,
-} from './benchmarkFixtures'
+} from './benchmarkFixtures.ts'

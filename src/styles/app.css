@@ -1,0 +1,218 @@
+:root {
+  background: var(--blg-paper);
+  color: var(--blg-ink-800);
+  font-family: var(--blg-font-sans);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  min-width: 20rem;
+  max-width: 100%;
+  overflow-x: clip;
+  scroll-behavior: smooth;
+  scrollbar-gutter: stable;
+}
+
+body {
+  margin: 0;
+  min-width: 20rem;
+  min-height: 100vh;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+#root {
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+.blg-dashboard {
+  overflow-x: clip;
+}
+
+.blg-dashboard__workspace,
+.blg-constraint-lab,
+.blg-evidence,
+.blg-table-wrap {
+  min-width: 0;
+}
+
+.blg-table-wrap {
+  max-width: 100%;
+  width: 100%;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+button {
+  touch-action: manipulation;
+}
+
+::selection {
+  background: var(--blg-signal);
+  color: var(--blg-signal-ink);
+}
+
+.blg-skip-link {
+  background: var(--blg-signal);
+  color: var(--blg-signal-ink);
+  font-family: var(--blg-font-sans);
+  font-size: var(--blg-text-sm);
+  font-weight: 750;
+  left: var(--blg-space-4);
+  padding: var(--blg-space-3) var(--blg-space-4);
+  position: fixed;
+  top: var(--blg-space-3);
+  transform: translateY(-200%);
+  transition: transform var(--blg-duration-fast) var(--blg-ease-out);
+  z-index: 20;
+}
+
+.blg-skip-link:focus {
+  outline: 2px solid var(--blg-ink-950);
+  outline-offset: 2px;
+  transform: translateY(0);
+}
+
+.blg-app-header {
+  backdrop-filter: blur(0.75rem);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.blg-constraint-lab {
+  background: var(--blg-surface-raised);
+  border-top: 3px solid var(--blg-ink-950);
+}
+
+.blg-constraint-lab__header {
+  align-items: flex-end;
+  display: flex;
+  gap: var(--blg-space-6);
+  justify-content: space-between;
+  padding: var(--blg-space-5) var(--blg-space-6) 0;
+}
+
+.blg-constraint-lab__header h2 {
+  color: var(--blg-ink-950);
+  font-size: var(--blg-text-xl);
+  letter-spacing: -0.025em;
+  line-height: 1.15;
+  margin: var(--blg-space-2) 0 0;
+}
+
+.blg-presets {
+  display: flex;
+  gap: var(--blg-space-2);
+}
+
+.blg-preset {
+  background: transparent;
+  border: 1px solid var(--blg-line-strong);
+  border-radius: 999px;
+  color: var(--blg-ink-800);
+  cursor: pointer;
+  font-family: var(--blg-font-data);
+  font-size: var(--blg-text-xs);
+  font-weight: 700;
+  min-height: 2.5rem;
+  padding: 0.55rem 0.85rem;
+  transition:
+    background-color var(--blg-duration-fast) var(--blg-ease-out),
+    border-color var(--blg-duration-fast) var(--blg-ease-out),
+    color var(--blg-duration-fast) var(--blg-ease-out);
+}
+
+.blg-preset:hover {
+  border-color: var(--blg-accent);
+}
+
+.blg-preset[aria-pressed='true'] {
+  background: var(--blg-accent);
+  border-color: var(--blg-accent);
+  color: #fff;
+}
+
+.blg-preset:focus-visible {
+  outline: 2px solid var(--blg-accent);
+  outline-offset: 3px;
+  box-shadow: var(--blg-shadow-focus);
+}
+
+.blg-constraint-lab .blg-threshold-control {
+  border: 0;
+  border-top: var(--blg-border);
+  margin-top: var(--blg-space-5);
+}
+
+.blg-result-announcement {
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  height: 1px;
+  overflow: hidden;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+}
+
+.blg-dashboard__workspace--export {
+  padding-block: clamp(2rem, 5vw, 4rem);
+}
+
+.blg-footer {
+  align-items: center;
+  background: #0c1814;
+  border-top: 1px solid #30433b;
+  color: #9fb2a9;
+  display: flex;
+  font-family: var(--blg-font-sans);
+  font-size: var(--blg-text-xs);
+  gap: var(--blg-space-4);
+  justify-content: space-between;
+  padding: var(--blg-space-5) clamp(1rem, 4vw, 3.5rem);
+}
+
+.blg-footer strong {
+  color: var(--blg-signal);
+  letter-spacing: -0.02em;
+}
+
+@media (max-width: 640px) {
+  .blg-constraint-lab__header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding-inline: var(--blg-space-4);
+  }
+
+  .blg-presets,
+  .blg-preset {
+    width: 100%;
+  }
+
+  .blg-preset {
+    flex: 1;
+  }
+
+  .blg-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .blg-skip-link,
+  .blg-preset {
+    transition-duration: 0.01ms;
+  }
+}

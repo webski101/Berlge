@@ -9,7 +9,7 @@ export type {
   MetricScores,
   PreferenceMetric,
   RequirementViolation,
-  TestPassCounts,
+  DeliveryCounts,
   ViolationCode,
   WeightedPreferences,
 } from './types.ts'

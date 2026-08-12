@@ -28,14 +28,16 @@ function isNonNegativeFinite(value: number): boolean {
   return Number.isFinite(value) && value >= 0
 }
 
-function validTestCounts(metrics: BenchmarkMetrics): boolean {
-  const { passed, total } = metrics.tests
+function validDeliveryCounts(metrics: BenchmarkMetrics): boolean {
+  const { successful, failed, total } = metrics.deliveries
   return (
-    Number.isInteger(passed) &&
+    Number.isInteger(successful) &&
+    Number.isInteger(failed) &&
     Number.isInteger(total) &&
-    passed >= 0 &&
+    successful >= 0 &&
+    failed >= 0 &&
     total > 0 &&
-    passed <= total
+    successful + failed === total
   )
 }
 
@@ -44,8 +46,8 @@ function invalidBenchmarkFields(candidate: Candidate): string[] {
     (metric) => !isNonNegativeFinite(candidate.metrics[metric]),
   )
 
-  if (!validTestCounts(candidate.metrics)) {
-    fields.push('tests')
+  if (!validDeliveryCounts(candidate.metrics)) {
+    fields.push('deliveries')
   }
 
   return fields
@@ -63,7 +65,7 @@ function requirementViolations(
       code: 'invalid-benchmark',
       message: `Invalid benchmark data: ${invalidFields.join(', ')}`,
       actual: invalidFields.join(', '),
-      required: 'finite non-negative metrics and at least one valid test result',
+      required: 'finite non-negative metrics and at least one valid delivery result',
     })
   }
 
@@ -88,15 +90,15 @@ function requirementViolations(
   }
 
   if (
-    input.hardRequirements.requireAllTestsPass &&
-    validTestCounts(candidate.metrics) &&
-    candidate.metrics.tests.passed !== candidate.metrics.tests.total
+    input.hardRequirements.requireAllDeliveriesSucceed &&
+    validDeliveryCounts(candidate.metrics) &&
+    candidate.metrics.deliveries.failed !== 0
   ) {
     violations.push({
-      code: 'required-tests-failed',
-      message: `${candidate.metrics.tests.passed}/${candidate.metrics.tests.total} tests passed; all are required`,
-      actual: `${candidate.metrics.tests.passed}/${candidate.metrics.tests.total} passed`,
-      required: `${candidate.metrics.tests.total}/${candidate.metrics.tests.total} passed`,
+      code: 'required-deliveries-failed',
+      message: `${candidate.metrics.deliveries.failed}/${candidate.metrics.deliveries.total} deliveries failed; zero failures are required`,
+      actual: `${candidate.metrics.deliveries.failed} failed`,
+      required: 'zero failed deliveries',
     })
   }
 
@@ -156,7 +158,7 @@ function winnerExplanation(
   eligibleCount: number,
 ): string {
   const { metrics } = candidate
-  return `${winner.candidateName} wins with preference score ${winner.weightedPreferenceScore.toFixed(4)} among ${eligibleCount} eligible candidate${eligibleCount === 1 ? '' : 's'}: ${metrics.p95LatencyMs} ms p95, ${metrics.reconnectTimeMs} ms reconnect, ${metrics.implementationSizeLines} lines, complexity ${metrics.complexity}, and ${metrics.tests.passed}/${metrics.tests.total} tests passed.`
+  return `${winner.candidateName} wins with preference score ${winner.weightedPreferenceScore.toFixed(4)} among ${eligibleCount} eligible candidate${eligibleCount === 1 ? '' : 's'}: ${metrics.p95LatencyMs} ms measured p95, ${metrics.reconnectTimeMs} ms measured recovery, ${metrics.implementationSizeLines} measured lines, declared complexity ${metrics.complexity}, and ${metrics.deliveries.successful}/${metrics.deliveries.total} deliveries succeeded.`
 }
 
 /**

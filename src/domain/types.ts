@@ -1,6 +1,7 @@
-/** Counts from the deterministic test suite run for a candidate. */
-export interface TestPassCounts {
-  readonly passed: number
+/** Delivery outcomes observed for a candidate implementation. */
+export interface DeliveryCounts {
+  readonly successful: number
+  readonly failed: number
   readonly total: number
 }
 
@@ -12,7 +13,7 @@ export interface TestPassCounts {
  * 5 = most complex), provided the same scale is used for every candidate.
  */
 export interface BenchmarkMetrics {
-  readonly tests: TestPassCounts
+  readonly deliveries: DeliveryCounts
   readonly p95LatencyMs: number
   readonly reconnectTimeMs: number
   readonly implementationSizeLines: number
@@ -28,7 +29,7 @@ export interface Candidate {
 /** Requirements are gates, not contributors to the preference score. */
 export interface HardRequirements {
   readonly maximumP95LatencyMs: number
-  readonly requireAllTestsPass: boolean
+  readonly requireAllDeliveriesSucceed: boolean
 }
 
 /**
@@ -54,7 +55,7 @@ export type ViolationCode =
   | 'invalid-benchmark'
   | 'invalid-hard-requirement'
   | 'p95-latency-exceeded'
-  | 'required-tests-failed'
+  | 'required-deliveries-failed'
 
 export interface RequirementViolation {
   readonly code: ViolationCode

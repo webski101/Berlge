@@ -34,10 +34,10 @@ export function ExperimentStatus({
       </div>
       <div className="blg-experiment-status__progress">
         <div className="blg-experiment-status__progress-label">
-          <span>Test suites</span>
+          <span>Transports</span>
           <strong>{clampedRuns} / {totalRuns}</strong>
         </div>
-        <progress max={Math.max(totalRuns, 1)} value={clampedRuns} aria-label={`${clampedRuns} of ${totalRuns} test suites complete`} />
+        <progress max={Math.max(totalRuns, 1)} value={clampedRuns} aria-label={`${clampedRuns} of ${totalRuns} transports complete`} />
       </div>
       <div className="blg-experiment-status__aside">
         <StatusBadge status={badgeStatus} label={state === 'running' ? 'In progress' : state} compact />

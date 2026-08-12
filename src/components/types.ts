@@ -11,7 +11,7 @@ export interface CandidateIdentity {
 }
 
 export interface CandidateMetricSet {
-  tests: string
+  deliveries: string
   p95Latency: string
   reconnect: string
   lines: string

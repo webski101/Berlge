@@ -9,11 +9,11 @@ export interface CandidateSummaryCardsProps {
 }
 
 const metricLabels = {
-  tests: 'Tests',
-  p95Latency: 'p95 latency',
-  reconnect: 'Reconnect',
-  lines: 'Lines',
-  complexity: 'Complexity',
+  deliveries: 'Measured deliveries',
+  p95Latency: 'Measured p95 latency',
+  reconnect: 'Measured recovery',
+  lines: 'Measured lines',
+  complexity: 'Declared complexity',
 } as const
 
 export function CandidateSummaryCards({

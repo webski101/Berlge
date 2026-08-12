@@ -92,6 +92,45 @@ button {
   border-top: 3px solid var(--blg-ink-950);
 }
 
+.blg-provenance {
+  background: #f0f4ed;
+  border-bottom: var(--blg-border);
+  border-top: var(--blg-border);
+  display: grid;
+  gap: var(--blg-space-5);
+  grid-template-columns: minmax(15rem, 0.8fr) minmax(24rem, 1.4fr);
+  margin-inline: auto;
+  max-width: 96rem;
+  padding: var(--blg-space-6) clamp(1rem, 4vw, 3.5rem);
+}
+
+.blg-provenance--live { background: #eaf4ee; }
+.blg-provenance h2 { color: var(--blg-ink-950); font-size: var(--blg-text-xl); margin: var(--blg-space-2) 0; }
+.blg-provenance p { line-height: 1.5; margin: 0; }
+.blg-provenance dl { display: grid; gap: var(--blg-space-3); grid-template-columns: repeat(2, minmax(0, 1fr)); margin: 0; }
+.blg-provenance dl div { border-bottom: var(--blg-border); min-width: 0; padding-bottom: var(--blg-space-2); }
+.blg-provenance dt { color: var(--blg-ink-600); font-size: var(--blg-text-xs); font-weight: 700; text-transform: uppercase; }
+.blg-provenance dd { font-family: var(--blg-font-data); font-size: var(--blg-text-sm); margin: var(--blg-space-1) 0 0; overflow-wrap: anywhere; }
+.blg-provenance details,
+.blg-provenance__disclaimer { grid-column: 1 / -1; }
+.blg-provenance summary { cursor: pointer; font-weight: 750; }
+.blg-provenance ul { display: grid; gap: var(--blg-space-2); margin-bottom: 0; padding-inline-start: 1.25rem; }
+.blg-provenance li { font-family: var(--blg-font-data); font-size: var(--blg-text-xs); overflow-wrap: anywhere; }
+.blg-provenance .blg-provenance__disclaimer { border-top: var(--blg-border); color: var(--blg-ink-600); font-size: var(--blg-text-sm); padding-top: var(--blg-space-4); }
+
+.blg-benchmark-error {
+  align-items: center;
+  background: #fff0ea;
+  border: 1px solid #ba4d28;
+  display: flex;
+  gap: var(--blg-space-6);
+  justify-content: space-between;
+  padding: var(--blg-space-5);
+}
+.blg-benchmark-error strong { color: #73250f; }
+.blg-benchmark-error p { margin: var(--blg-space-2) 0 0; }
+.blg-fallback-note { background: #f1f4e8; border: var(--blg-border); margin: 0; padding: var(--blg-space-4); }
+
 .blg-constraint-lab__header {
   align-items: flex-end;
   display: flex;
@@ -185,6 +224,9 @@ button {
 }
 
 @media (max-width: 640px) {
+  .blg-provenance { grid-template-columns: 1fr; }
+  .blg-provenance dl { grid-template-columns: 1fr; }
+  .blg-benchmark-error { align-items: stretch; flex-direction: column; }
   .blg-constraint-lab__header {
     align-items: flex-start;
     flex-direction: column;

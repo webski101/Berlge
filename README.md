@@ -1,207 +1,141 @@
 # Berlge
 
-> **Turn architecture debates into deterministic experiments.**
+Berlge is a local-first architecture decision workbench. This MVP compares the
+three **included** browser-delivery implementations—HTTP Polling, Server-Sent
+Events (SSE), and WebSockets—then feeds their evidence into a deterministic
+TypeScript scorer and exports a Markdown ADR.
 
-Berlge is a local-first architecture decision workbench. It replaces opinion-led
-debates with a repeatable comparison of alternatives: reject options that violate
-hard requirements, rank the remaining options against measured evidence and
-explicit preference weights, then export the result as a deterministic Markdown
-architecture decision record (ADR).
+Results are measurements of these small loopback implementations and their
+documented settings. They are **not universal protocol-performance claims**.
 
-The current MVP demonstrates the approach by comparing **Polling**,
-**Server-Sent Events (SSE)**, and **WebSockets** for browser updates.
+## What the experiment does
 
-## Why Berlge?
+`benchmark/runner.js` is the single benchmark implementation used by both the CLI
+and dashboard. It:
 
-Architecture decisions often end with the strongest opinion in the room. Teams
-may discuss latency, reliability, implementation cost, and operational complexity,
-but without a shared decision model those factors are difficult to compare and the
-reasoning is difficult to reproduce later.
+- starts each transport on an operating-system-assigned temporary port;
+- sends multiple real events and records successful/failed deliveries;
+- measures nearest-rank p95 delivery latency and a forced-failure recovery probe;
+- counts nonblank, non-comment lines in each transport source file;
+- records ISO timestamp, samples per transport, Node version, OS, configuration,
+  evidence source, and provenance;
+- validates the resulting JSON; and
+- closes streams, sockets, timers, and servers in `finally` blocks.
 
-Berlge makes the decision contract explicit:
+The fixed local configurations are:
 
-1. **Hard constraints gate eligibility.** An alternative that misses a mandatory
-   requirement cannot win on preference points.
-2. **Evidence makes alternatives comparable.** The demo evaluates test results,
-   p95 latency, reconnect time, implementation size, and complexity.
-3. **Preference weights expose trade-offs.** Lower-is-better metrics are normalized
-   and combined using visible weights rather than hidden intuition.
-4. **A stable rule produces the winner.** The same inputs always produce the same
-   result, including deterministic tie-breaking.
-5. **The reasoning becomes an artifact.** The full decision can be copied or
-   downloaded as a Markdown ADR with requirements, weights, evidence, violations,
-   scores, winner, and rationale.
+| Included implementation | Delivery cadence | Recovery behavior |
+| --- | ---: | --- |
+| HTTP Polling | 600 ms | one forced HTTP 503, then retry at the next 600 ms poll |
+| SSE | 150 ms server flush | server closes stream; client reconnects after 250 ms |
+| WebSockets | 20 ms server flush | server closes socket; application reconnects after 400 ms |
 
-The final decision is made by a **deterministic TypeScript scoring engine**. No LLM
-participates in scoring, ranking, or tie-breaking.
+These settings are chosen so SSE should ordinarily satisfy the 500 ms control,
+while the included WebSocket is ordinarily the option satisfying 100 ms. The
+winner is never hard-coded: observed deliveries and latency are passed to the
+same scorer after each run.
 
-## Demo: one constraint changes the decision
+### Measured, configured, declared, and prepared
 
-The bundled experiment uses prepared benchmark evidence and asks which transport
-should deliver server-to-browser updates.
-
-| Option | Tests | p95 latency | Reconnect | Implementation | Complexity |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Polling | 36/36 | 820 ms | 1,050 ms | 54 lines | 2 |
-| Server-Sent Events | 36/36 | 180 ms | 340 ms | 82 lines | 3 |
-| WebSockets | 36/36 | 72 ms | 510 ms | 156 lines | 7 |
-
-Preference weights favor implementation size and simplicity (35% each), with p95
-latency and reconnect time weighted at 15% each.
-
-- **At a 500 ms maximum p95 latency, SSE wins.** Polling is ineligible. SSE and
-  WebSockets both pass the gate, but SSE's smaller, simpler implementation wins
-  the weighted trade-off.
-- **At a 100 ms maximum p95 latency, WebSockets wins.** Polling and SSE are
-  ineligible, leaving the 72 ms WebSockets result as the only eligible option.
-
-This is the core Berlge experience: change a requirement, see eligibility and
-ranking recalculate immediately, inspect the evidence, and export the new decision
-as a deterministic Markdown ADR.
-
-## Architecture
-
-```mermaid
-flowchart LR
-    E[Prepared benchmark evidence] --> I[Decision input]
-    C[Hard constraints] --> S[Deterministic TypeScript scorer]
-    W[Preference weights] --> S
-    I --> S
-    S --> R[Eligible options and stable ranking]
-    R --> D[React decision dashboard]
-    R --> A[Markdown ADR export]
-```
-
-Everything runs in the browser after the static application loads. The scorer
-first records hard-requirement violations, then min-max normalizes the
-lower-is-better evidence metrics and applies normalized preference weights.
-Ineligible alternatives remain visible for auditability but cannot be selected as
-the winner. Equal eligible scores are resolved by a stable candidate-ID rule.
+- **Measured:** deliveries, p95 latency, recovery time, and relevant
+  implementation source lines.
+- **Configured:** delivery cadence, retry/reconnect delay, and recovery trigger.
+- **Declared:** complexity is a human-defined ordinal factor (2 Polling, 3 SSE,
+  7 WebSockets), not a measurement.
+- **Prepared:** the initial checked-in evidence is a demonstration fixture. It is
+  labeled **Prepared demonstration evidence** everywhere and is never presented
+  as a live result.
 
 ## Run locally
 
-### Prerequisites
-
-- Node.js `^20.19.0` or `>=22.12.0`
-- npm
-
-### Setup
+Requires Node.js `>=22.12.0` and npm (the included client uses Node's built-in
+WebSocket implementation).
 
 ```bash
-git clone <repository-url>
-cd berlge
 npm ci
-```
-
-### Start the app
-
-```bash
 npm run dev
 ```
 
-Open the URL printed by Vite (normally `http://localhost:5173`).
+Open the URL printed by Vite. Select **Run experiment** to call the development
+server's local-only `POST /api/benchmark` route. While work is running the button
+is disabled and the dashboard reports that real loopback events are being sent.
+Successful results are labeled **Live local benchmark** with their timestamp,
+sample count, runtime, OS, source, and configuration.
 
-### Reproduce the demo
+The endpoint is intentionally supplied by the Vite development server and is not
+part of the static production bundle. It accepts only `POST` and makes no external
+network, API, AI, database, cloud, or authentication call.
 
-1. Start at the default **500 ms** p95 limit and confirm that **Server-Sent
-   Events** is recommended.
-2. Select the **100 ms** preset and confirm that SSE becomes ineligible and
-   **WebSockets** is recommended.
-3. Inspect the eligibility states, normalized weighted scores, and recommendation
-   rationale in the evidence ledger.
-4. Choose **Copy Markdown** or **Download ADR** to export the complete decision.
-5. Switch between the presets and export again to verify that the ADR follows the
-   active constraint and recommendation.
+If the live run fails, Berlge displays the error without relabeling the current
+evidence. The user may retry **Run experiment** or intentionally choose **Use
+prepared demonstration evidence**. Fixture fallback is never automatic.
 
-### Test, lint, and build
+## Run the benchmark directly
+
+```bash
+npm run benchmark
+```
+
+The command writes validated JSON to stdout. Default sample count is 10 per
+transport. Because measurements use real local timers, exact values vary by host
+load, Node version, operating system, and scheduler.
+
+## Decision model
+
+Hard requirements gate candidates before ranking:
+
+1. every benchmark delivery must succeed; and
+2. measured p95 latency must not exceed the active 500 ms or 100 ms control.
+
+For visible comparison, lower-is-better values are min-max normalized. Weights
+are p95 latency 15%, recovery 15%, implementation lines 35%, and declared
+complexity 35%. Eligible ties are resolved by candidate ID, keeping scoring
+deterministic for identical evidence and constraints.
+
+The ADR contains provenance, evidence source, measurement timestamp, environment,
+sample count, transport configurations, included-implementation disclaimer,
+measured values, declared factors, constraints, scores, recommendation, and
+rationale.
+
+## Verification
 
 ```bash
 npm test
 npm run lint
 npm run build
+npm run benchmark
 ```
 
-The production build is written to `dist/`. To inspect it locally:
+Tests cover p95, schema validation and ingestion, provenance, intentional
+fallback, deterministic scoring, ADR metadata, and temporary-server cleanup.
 
-```bash
-npm run preview
-```
+## Local-MVP limitations
 
-## Technology stack
+- Loopback timing does not model internet latency, proxies, TLS, packet loss,
+  browser throttling, mobile radios, load balancers, or production concurrency.
+- Recovery is a repeatable synthetic disconnect, not a complete outage study.
+- The WebSocket implementation is deliberately minimal: small text frames only,
+  with no fragmentation, extensions, authentication, or production hardening.
+- SSE parsing and Polling queues are likewise benchmark fixtures, not reusable
+  production libraries.
+- Source-line counts depend on the documented counter and are not maintenance-cost
+  measurements.
+- Complexity remains declared human judgment.
+- Production `vite build` is static; live benchmarking requires `npm run dev` or
+  the CLI runner.
 
-| Area | Technology |
-| --- | --- |
-| Interface | React 19, semantic HTML, custom CSS |
-| Decision engine | Framework-independent TypeScript |
-| Development and build | Vite 8, TypeScript 6 |
-| Tests | Node.js built-in test runner |
-| Linting | Oxlint |
-| Output | Deterministic Markdown ADR generated in the browser |
-
-There is no backend, database, authentication layer, external AI API, or runtime
-network dependency in this MVP.
-
-## Repository structure
+## Project layout
 
 ```text
-berlge/
-├── public/                      # Static public assets
-├── src/
-│   ├── app/                     # Demo-to-domain integration and view model
-│   ├── components/              # Dashboard and export UI components
-│   ├── data/                    # Prepared benchmark fixtures
-│   ├── domain/                  # Deterministic scoring types and engine
-│   ├── lib/                     # ADR and formatting utilities
-│   ├── styles/                  # Tokens and responsive dashboard styles
-│   ├── App.tsx                  # Interactive experiment composition
-│   └── main.tsx                 # React entry point
-├── index.html
-├── package.json
-└── vite.config.ts
+benchmark/
+  evidence.js                 validated report schema
+  runner.js                   shared orchestrator and p95/line counting
+  transports/                 included Polling, SSE, and WebSocket implementations
+  vitePlugin.js               local POST /api/benchmark adapter
+src/
+  app/                        evidence ingestion and decision-model adapter
+  domain/                     deterministic scorer
+  data/                       prepared demonstration evidence
+  lib/                        ADR generation
+  components/ + styles/       existing dashboard presentation
 ```
-
-Tests live beside the decision model, domain engine, and export utilities they
-verify. They cover deterministic repeatability, hard-gate behavior, both demo
-outcomes, edge cases, and stable ADR generation.
-
-## Built with Agent Orchestrator and Codex
-
-Agent Orchestrator and Codex were used during development to build the scoring
-engine, benchmark fixtures and ADR export, dashboard, integration, and final polish
-in isolated worktrees. That workflow helped keep each contribution scoped and
-verifiable before integration.
-
-They are **development tools, not runtime dependencies**. The MVP does not invoke
-Agent Orchestrator, Codex, or any LLM while the app is running, and no model is
-involved in the final decision.
-
-## Current MVP limitations
-
-- The demo uses **prepared benchmark evidence** checked into the repository. It
-  does not currently execute live load tests, collect telemetry, or validate the
-  evidence against deployed systems.
-- The UI presents one prepared Polling/SSE/WebSockets scenario. Candidates,
-  evidence, and preference weights are currently defined in code; the latency
-  constraint is the interactive input.
-- Complexity is a supplied ordinal measure, not an automatically derived metric.
-- Decisions run and export locally; there is no persistence, collaboration,
-  approval workflow, evidence signing, or hosted decision history.
-- Agent Orchestrator is not invoked at runtime and the app does not autonomously
-  create experiments or implementation worktrees.
-
-## Realistic next steps
-
-1. Define a versioned decision schema and import/export arbitrary candidates,
-   constraints, evidence, and weights.
-2. Add opt-in benchmark adapters that ingest real test and observability output
-   with source metadata, timestamps, and integrity hashes.
-3. Let users edit weights and requirements, compare scenarios, and run sensitivity
-   analysis without changing source code.
-4. Persist decision revisions and add review, approval, and shareable ADR history.
-5. Expand constraint types and scoring strategies while retaining deterministic,
-   explainable evaluation and comprehensive regression fixtures.
-
----
-
-**Berlge turns _“I think”_ into _“here is the evidence, the rule, and the
-reproducible result.”_**

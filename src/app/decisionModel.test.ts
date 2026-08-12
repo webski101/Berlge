@@ -13,7 +13,7 @@ test('integrated model recommends SSE at the prepared 500 ms constraint', () => 
 
   assert.equal(model.result.winnerId, 'sse')
   assert.equal(model.winner?.name, 'Server-Sent Events')
-  assert.match(decisionReasons(model).join(' '), /0\.812 preference score/)
+  assert.match(decisionReasons(model).join(' '), /0\.577 preference score/)
 })
 
 test('integrated model recommends WebSockets when the constraint is 100 ms', () => {
@@ -29,7 +29,7 @@ test('integrated model recommends WebSockets when the constraint is 100 ms', () 
   assert.match(decisionReasons(model).join(' '), /only eligible option/)
 })
 
-test('integrated ADR contains the live threshold, winner, and violations', () => {
+test('integrated ADR contains the active threshold, winner, and violations', () => {
   const model = createRealtimeDecision(100)
   const markdown = generateAdrMarkdown(
     createAdrInput(model, '2026-08-12'),
@@ -37,5 +37,5 @@ test('integrated ADR contains the live threshold, winner, and violations', () =>
 
   assert.match(markdown, /\*\*Winner:\*\* WebSockets/)
   assert.match(markdown, /p95 latency must be at most 100 ms/)
-  assert.match(markdown, /Server-Sent Events: 180 ms p95 exceeds the 100 ms maximum/)
+  assert.match(markdown, /Server-Sent Events: 165 ms p95 exceeds the 100 ms maximum/)
 })

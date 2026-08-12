@@ -11,7 +11,7 @@ const candidates = [
     id: 'polling',
     name: 'Polling',
     metrics: {
-      tests: { passed: 20, total: 20 },
+      deliveries: { successful: 20, failed: 0, total: 20 },
       p95LatencyMs: 450,
       reconnectTimeMs: 1_000,
       implementationSizeLines: 70,
@@ -22,7 +22,7 @@ const candidates = [
     id: 'sse',
     name: 'SSE',
     metrics: {
-      tests: { passed: 20, total: 20 },
+      deliveries: { successful: 20, failed: 0, total: 20 },
       p95LatencyMs: 300,
       reconnectTimeMs: 300,
       implementationSizeLines: 80,
@@ -33,7 +33,7 @@ const candidates = [
     id: 'websocket',
     name: 'WebSockets',
     metrics: {
-      tests: { passed: 20, total: 20 },
+      deliveries: { successful: 20, failed: 0, total: 20 },
       p95LatencyMs: 80,
       reconnectTimeMs: 120,
       implementationSizeLines: 180,
@@ -47,7 +47,7 @@ function decision(maximumP95LatencyMs: number): DecisionInput {
     candidates,
     hardRequirements: {
       maximumP95LatencyMs,
-      requireAllTestsPass: true,
+      requireAllDeliveriesSucceed: true,
     },
     weightedPreferences: {
       p95LatencyMs: 2,
@@ -77,14 +77,14 @@ test('hard-constraint violations are surfaced and make candidates ineligible', (
         ...candidates[0],
         metrics: {
           ...candidates[0].metrics,
-          tests: { passed: 19, total: 20 },
+          deliveries: { successful: 19, failed: 1, total: 20 },
           p95LatencyMs: 501,
         },
       },
     ],
     hardRequirements: {
       maximumP95LatencyMs: 500,
-      requireAllTestsPass: true,
+      requireAllDeliveriesSucceed: true,
     },
     weightedPreferences: decision(500).weightedPreferences,
   }
@@ -95,11 +95,11 @@ test('hard-constraint violations are surfaced and make candidates ineligible', (
   assert.equal(evaluation.eligible, false)
   assert.deepEqual(
     evaluation.violations.map((violation) => violation.code),
-    ['p95-latency-exceeded', 'required-tests-failed'],
+    ['p95-latency-exceeded', 'required-deliveries-failed'],
   )
   assert.equal(result.winnerId, null)
   assert.match(result.explanation, /501 ms p95 exceeds/)
-  assert.match(result.explanation, /19\/20 tests passed/)
+  assert.match(result.explanation, /1\/20 deliveries failed/)
 })
 
 test('SSE wins at 500 ms because size and simplicity outweigh WebSocket speed', () => {
@@ -116,7 +116,7 @@ test('SSE wins at 500 ms because size and simplicity outweigh WebSocket speed', 
   )
   assert.ok(sse.normalizedMetrics.complexity > websocket.normalizedMetrics.complexity)
   assert.ok(sse.weightedPreferenceScore > websocket.weightedPreferenceScore)
-  assert.match(result.explanation, /80 lines, complexity 2/)
+  assert.match(result.explanation, /80 measured lines, declared complexity 2/)
 })
 
 test('changing only maximum latency to 100 ms makes WebSockets win', () => {
@@ -140,14 +140,14 @@ test('changing only maximum latency to 100 ms makes WebSockets win', () => {
   assert.equal(evaluationFor(result, 'websocket').eligible, true)
 })
 
-test('test-count and weight edge cases stay finite, deterministic, and immutable', () => {
+test('delivery-count and weight edge cases stay finite, deterministic, and immutable', () => {
   const input: DecisionInput = {
     candidates: [
       {
         id: 'zeta',
         name: 'Zeta',
         metrics: {
-          tests: { passed: 1, total: 1 },
+          deliveries: { successful: 1, failed: 0, total: 1 },
           p95LatencyMs: 10,
           reconnectTimeMs: 10,
           implementationSizeLines: 10,
@@ -158,7 +158,7 @@ test('test-count and weight edge cases stay finite, deterministic, and immutable
         id: 'alpha',
         name: 'Alpha',
         metrics: {
-          tests: { passed: 1, total: 1 },
+          deliveries: { successful: 1, failed: 0, total: 1 },
           p95LatencyMs: 10,
           reconnectTimeMs: 10,
           implementationSizeLines: 10,
@@ -166,10 +166,10 @@ test('test-count and weight edge cases stay finite, deterministic, and immutable
         },
       },
       {
-        id: 'no-tests',
-        name: 'No tests',
+        id: 'no-deliveries',
+        name: 'No deliveries',
         metrics: {
-          tests: { passed: 0, total: 0 },
+          deliveries: { successful: 0, failed: 0, total: 0 },
           p95LatencyMs: 10,
           reconnectTimeMs: 10,
           implementationSizeLines: 10,
@@ -179,7 +179,7 @@ test('test-count and weight edge cases stay finite, deterministic, and immutable
     ],
     hardRequirements: {
       maximumP95LatencyMs: 100,
-      requireAllTestsPass: true,
+      requireAllDeliveriesSucceed: true,
     },
     weightedPreferences: {
       p95LatencyMs: 0,
@@ -200,9 +200,9 @@ test('test-count and weight edge cases stay finite, deterministic, and immutable
     complexity: 0,
   })
   assert.equal(result.winnerId, 'alpha')
-  assert.equal(evaluationFor(result, 'no-tests').eligible, false)
+  assert.equal(evaluationFor(result, 'no-deliveries').eligible, false)
   assert.equal(
-    evaluationFor(result, 'no-tests').violations[0]?.code,
+    evaluationFor(result, 'no-deliveries').violations[0]?.code,
     'invalid-benchmark',
   )
 

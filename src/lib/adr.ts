@@ -22,12 +22,24 @@ export interface AdrWeightedPreference {
 }
 
 export interface AdrCandidateEvidence {
-  readonly testsPassed: number
-  readonly testsTotal: number
+  readonly deliveriesSucceeded: number
+  readonly deliveriesFailed: number
+  readonly deliveriesTotal: number
   readonly p95LatencyMs: number
   readonly reconnectMs: number
   readonly implementationLines: number
   readonly complexity: number
+}
+
+export interface AdrEvidenceMetadata {
+  readonly provenance: string
+  readonly evidenceSource: string
+  readonly timestamp: string
+  readonly sampleCount: number
+  readonly nodeVersion: string
+  readonly os: string
+  readonly configurations: Readonly<Record<string, Readonly<Record<string, string | number>>>>
+  readonly disclaimer: string
 }
 
 export interface AdrCandidateEvaluation {
@@ -48,6 +60,7 @@ export interface AdrDecisionResult {
 
 export interface AdrInput {
   readonly decision: AdrDecisionMetadata
+  readonly evidenceMetadata: AdrEvidenceMetadata
   readonly hardRequirements: readonly AdrHardRequirement[]
   readonly weightedPreferences: readonly AdrWeightedPreference[]
   readonly evaluations: readonly AdrCandidateEvaluation[]
@@ -95,6 +108,25 @@ export function generateAdrMarkdown(input: AdrInput): string {
     `- **Status:** ${escapeInline(input.decision.status)}`,
     `- **Date:** ${escapeInline(input.decision.date)}`,
     '',
+    '## Evidence provenance',
+    '',
+    `- **Provenance:** ${escapeInline(input.evidenceMetadata.provenance)}`,
+    `- **Evidence source:** ${escapeInline(input.evidenceMetadata.evidenceSource)}`,
+    `- **Measurement timestamp:** ${escapeInline(input.evidenceMetadata.timestamp)}`,
+    `- **Sample count per transport:** ${input.evidenceMetadata.sampleCount}`,
+    `- **Environment:** Node ${escapeInline(input.evidenceMetadata.nodeVersion)} on ${escapeInline(input.evidenceMetadata.os)}`,
+    '',
+    `> ${input.evidenceMetadata.disclaimer}`,
+    '',
+    '### Included implementation configuration',
+    '',
+    '| Transport | Configuration |',
+    '| --- | --- |',
+    ...Object.entries(input.evidenceMetadata.configurations).map(
+      ([transport, configuration]) =>
+        `| ${escapeTableCell(transport)} | ${escapeTableCell(Object.entries(configuration).map(([key, value]) => `${key}=${value}`).join('; '))} |`,
+    ),
+    '',
     '## Context',
     '',
     input.decision.context,
@@ -137,14 +169,14 @@ export function generateAdrMarkdown(input: AdrInput): string {
     '',
     '## Evidence comparison',
     '',
-    '| Option | Tests | p95 latency (ms) | Reconnect (ms) | Implementation lines | Complexity | Eligible | Weighted score |',
+    '| Option | Deliveries | Measured p95 latency (ms) | Measured recovery (ms) | Measured implementation lines | Declared complexity | Eligible | Weighted score |',
     '| --- | ---: | ---: | ---: | ---: | ---: | --- | ---: |',
   )
 
   for (const evaluation of input.evaluations) {
     const evidence = evaluation.evidence
     lines.push(
-      `| ${escapeTableCell(evaluation.name)} | ${evidence.testsPassed}/${evidence.testsTotal} | ${evidence.p95LatencyMs} | ${evidence.reconnectMs} | ${evidence.implementationLines} | ${evidence.complexity} | ${evaluation.eligible ? 'Yes' : 'No'} | ${formatScore(evaluation.weightedScore)} |`,
+      `| ${escapeTableCell(evaluation.name)} | ${evidence.deliveriesSucceeded}/${evidence.deliveriesTotal} succeeded (${evidence.deliveriesFailed} failed) | ${evidence.p95LatencyMs} | ${evidence.reconnectMs} | ${evidence.implementationLines} | ${evidence.complexity} | ${evaluation.eligible ? 'Yes' : 'No'} | ${formatScore(evaluation.weightedScore)} |`,
     )
   }
 

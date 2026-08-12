@@ -8,6 +8,18 @@ TypeScript scorer and exports a Markdown ADR.
 Results are measurements of these small loopback implementations and their
 documented settings. They are **not universal protocol-performance claims**.
 
+Public demo: [https://berlge.vercel.app/](https://berlge.vercel.app/)
+
+## Hosted demo versus local benchmark
+
+- **Hosted interactive scoring demo:** the Vercel deployment uses explicitly
+  labeled **Prepared demonstration evidence**. You can change the latency
+  constraint, inspect scoring, compare candidates, and export an ADR, but the
+  static host does not execute transports or present prepared evidence as live.
+- **Local genuine transport benchmark:** clone the repository and run
+  `npm install`, then `npm run dev`. The Vite-only endpoint executes the three
+  loopback transports and labels successful results **Live local benchmark**.
+
 ## What the experiment does
 
 `benchmark/runner.js` is the single benchmark implementation used by both the CLI
@@ -52,7 +64,7 @@ Requires Node.js `>=22.12.0` and npm (the included client uses Node's built-in
 WebSocket implementation).
 
 ```bash
-npm ci
+npm install
 npm run dev
 ```
 

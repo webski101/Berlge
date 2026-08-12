@@ -33,10 +33,6 @@ export function ingestBenchmarkEvidence(value: unknown): DecisionEvidence {
   }
 }
 
-export function describeBenchmarkError(error: unknown): string {
-  return error instanceof Error ? error.message : 'The local benchmark returned an unknown error.'
-}
-
 export function getPreparedFallback(): DecisionEvidence {
   return preparedRealtimeDecision
 }

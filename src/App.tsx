@@ -27,7 +27,14 @@ import {
   evaluationFor,
   type RealtimeDecisionModel,
 } from './app/decisionModel.ts'
-import { describeBenchmarkError, ingestBenchmarkEvidence, getPreparedFallback } from './app/evidence.ts'
+import {
+  describeBenchmarkError,
+  getBenchmarkAvailability,
+  HOSTED_DEMO_MESSAGE,
+  LOCAL_BENCHMARK_INSTRUCTIONS,
+  requestBenchmarkEvidence,
+} from './app/benchmarkClient.ts'
+import { ingestBenchmarkEvidence, getPreparedFallback } from './app/evidence.ts'
 import './styles/app.css'
 
 const DECISION_DATE = '2026-08-12'
@@ -106,6 +113,7 @@ function fallbackCopy(markdown: string): boolean {
 }
 
 function App() {
+  const benchmarkAvailability = getBenchmarkAvailability(import.meta.env.DEV)
   const [maximumLatency, setMaximumLatency] = useState(500)
   const [evidence, setEvidence] = useState<DecisionEvidence>(preparedRealtimeDecision)
   const [isRunning, setIsRunning] = useState(false)
@@ -154,18 +162,13 @@ function App() {
   ]
 
   const handleRun = async () => {
-    if (runLock.current) return
+    if (!benchmarkAvailability.canRun || runLock.current) return
     runLock.current = true
     setIsRunning(true)
     setBenchmarkError('')
     setFallbackConfirmed(false)
     try {
-      const response = await fetch('/api/benchmark', { method: 'POST', headers: { accept: 'application/json' } })
-      const payload: unknown = await response.json()
-      if (!response.ok) {
-        const message = typeof payload === 'object' && payload !== null && 'error' in payload ? String(payload.error) : `Benchmark endpoint returned HTTP ${response.status}.`
-        throw new Error(message)
-      }
+      const payload = await requestBenchmarkEvidence()
       setEvidence(ingestBenchmarkEvidence(payload))
       setRunNumber((current) => current + 1)
     } catch (error) {
@@ -219,7 +222,14 @@ function App() {
   return (
     <div className="blg-dashboard">
       <a className="blg-skip-link" href="#decision-workspace">Skip to decision workspace</a>
-      <AppHeader experimentId={runNumber > 0 ? `L-${String(runNumber).padStart(3, '0')}` : 'fixture'} onRunExperiment={handleRun} runLabel="Run experiment" isRunning={isRunning} />
+      <AppHeader
+        experimentId={runNumber > 0 ? `L-${String(runNumber).padStart(3, '0')}` : 'fixture'}
+        onRunExperiment={handleRun}
+        runLabel={benchmarkAvailability.runLabel}
+        isRunning={isRunning}
+        isRunDisabled={!benchmarkAvailability.canRun}
+        runDescriptionId={!benchmarkAvailability.canRun ? 'hosted-demo-title' : undefined}
+      />
       <main id="decision-workspace">
         <DecisionBrief
           title={evidence.title} question={evidence.question} context={evidence.context}
@@ -238,8 +248,20 @@ function App() {
         </section>
 
         <div className="blg-dashboard__workspace">
+          {!benchmarkAvailability.canRun ? (
+            <section className="blg-hosted-demo" aria-labelledby="hosted-demo-title">
+              <div>
+                <p className="blg-kicker">Hosted interactive scoring demo</p>
+                <h2 id="hosted-demo-title">Prepared evidence, interactive scoring.</h2>
+              </div>
+              <div className="blg-hosted-demo__copy">
+                <p>{HOSTED_DEMO_MESSAGE}</p>
+                <p>{LOCAL_BENCHMARK_INSTRUCTIONS}</p>
+              </div>
+            </section>
+          ) : null}
           {benchmarkError ? (
-            <section className="blg-benchmark-error" role="alert"><div><strong>Local benchmark failed.</strong><p>{benchmarkError} The ledger still shows {evidence.provenance.label.toLowerCase()} and is not being relabeled.</p></div><button className="blg-button blg-button--tertiary" type="button" onClick={handleFallback}>Use prepared demonstration evidence</button></section>
+            <section className="blg-benchmark-error" role="alert"><div><strong>Live local benchmark did not complete.</strong><p>{benchmarkError}</p><p>The ledger still shows {evidence.provenance.label.toLowerCase()} and is not being relabeled.</p></div><button className="blg-button blg-button--tertiary" type="button" onClick={handleFallback}>Use prepared demonstration evidence</button></section>
           ) : null}
           {fallbackConfirmed ? <p className="blg-fallback-note" role="status">Prepared demonstration evidence selected intentionally. Run the experiment when the local endpoint is available.</p> : null}
           <section className="blg-constraint-lab" aria-labelledby="constraint-lab-title">

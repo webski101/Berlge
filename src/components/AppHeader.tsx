@@ -7,6 +7,8 @@ export interface AppHeaderProps {
   onRunExperiment?: () => void
   runLabel?: string
   isRunning?: boolean
+  isRunDisabled?: boolean
+  runDescriptionId?: string
 }
 
 export function AppHeader({
@@ -16,6 +18,8 @@ export function AppHeader({
   onRunExperiment,
   runLabel = 'Run experiment',
   isRunning = false,
+  isRunDisabled = false,
+  runDescriptionId,
 }: AppHeaderProps) {
   return (
     <header className="blg-app-header">
@@ -36,8 +40,9 @@ export function AppHeader({
             className="blg-button blg-button--primary"
             type="button"
             onClick={onRunExperiment}
-            disabled={isRunning}
+            disabled={isRunning || isRunDisabled}
             aria-busy={isRunning}
+            aria-describedby={runDescriptionId}
           >
             <RunIcon className="blg-button__icon" />
             {isRunning ? 'Experiment running…' : runLabel}
